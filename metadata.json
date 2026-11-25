@@ -1,0 +1,6 @@
+{
+  "name": "StrataFlow — AI Workflow Automation & Analytics",
+  "description": "Enterprise AI workflow automation, intelligent data analysis, integrated CRM and payment API connectors, automated reporting, and strategic lead generation for small to mid-sized enterprises.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
