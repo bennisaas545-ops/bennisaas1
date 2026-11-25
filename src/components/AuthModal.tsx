@@ -44,6 +44,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        setError(
+          "Workspace login requires the Node/Express server (static hosting preview has no backend API)."
+        );
+        return;
+      }
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Authentication failed.");

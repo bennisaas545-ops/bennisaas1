@@ -17,12 +17,13 @@ import { SUBSCRIPTION_PLANS } from "../data/plans";
 import type { TranslationBundle } from "../i18n/translations";
 import type { AppPage, LocaleCode, PlanPrice } from "../types";
 
-const HERO_IMG = "/src/assets/images/hero_ai_workspace_1795336661020.jpg";
-const LEAD_IMG = "/src/assets/images/service_lead_strategy_1795336661066.jpg";
-const AVATAR_IMG = "/src/assets/images/avatar_client_ops_1795336660410.jpg";
-const WORKFLOW_GIF = "/src/assets/images/workflow_live.gif";
-const ANALYTICS_GIF = "/src/assets/images/analytics_live.gif";
-const MARKETING_GIF = "/src/assets/images/marketing_lead_live.gif";
+const BASE_URL = import.meta.env.BASE_URL || "/";
+const HERO_IMG = `${BASE_URL}src/assets/images/hero_ai_workspace_1795336661020.jpg`;
+const LEAD_IMG = `${BASE_URL}src/assets/images/service_lead_strategy_1795336661066.jpg`;
+const AVATAR_IMG = `${BASE_URL}src/assets/images/avatar_client_ops_1795336660410.jpg`;
+const WORKFLOW_GIF = `${BASE_URL}src/assets/images/workflow_live.gif`;
+const ANALYTICS_GIF = `${BASE_URL}src/assets/images/analytics_live.gif`;
+const MARKETING_GIF = `${BASE_URL}src/assets/images/marketing_lead_live.gif`;
 
 interface PublicPagesProps {
   page: Exclude<AppPage, "workspace">;
@@ -109,6 +110,13 @@ export const PublicPages: React.FC<PublicPagesProps> = ({
           message: contactMessage,
         }),
       });
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        setSubmitError(
+          "Static preview detected (backend API unavailable). Please call +91 844 9423 404 or deploy with the Express server to submit online."
+        );
+        return;
+      }
       const data = await res.json();
       if (!res.ok) {
         setSubmitError(data.error || "Unable to submit inquiry.");

@@ -36,10 +36,27 @@ function getPageFromPathname(pathname: string): AppPage {
   return found ? found[0] : "home";
 }
 
+function getPageFromLocation(): AppPage {
+  if (typeof window === "undefined") return "home";
+  const hash = window.location.hash;
+  if (hash.startsWith("#/")) {
+    return getPageFromPathname(hash.slice(1));
+  }
+  return getPageFromPathname(window.location.pathname);
+}
+
+function shouldUseHashRouting(): boolean {
+  if (typeof window === "undefined") return false;
+  if (window.location.hostname.endsWith("github.io")) return true;
+  if (window.location.hash.startsWith("#/")) return true;
+  const normalized = window.location.pathname.replace(/\/+$/, "") || "/";
+  return !Object.values(PAGE_PATHS).includes(normalized);
+}
+
 export default function App() {
   const [locale, setLocale] = useState<LocaleCode>("en");
   const [activePage, setActivePage] = useState<AppPage>(() =>
-    getPageFromPathname(window.location.pathname)
+    getPageFromLocation()
   );
   const [selectedPlanPrice, setSelectedPlanPrice] = useState<PlanPrice>(449);
   const [prefilledFocus, setPrefilledFocus] = useState("");
@@ -61,11 +78,15 @@ export default function App() {
   const t = TRANSLATIONS[locale];
 
   useEffect(() => {
-    const handlePopState = () => {
-      setActivePage(getPageFromPathname(window.location.pathname));
+    const handleRouteChange = () => {
+      setActivePage(getPageFromLocation());
     };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    window.addEventListener("popstate", handleRouteChange);
+    window.addEventListener("hashchange", handleRouteChange);
+    return () => {
+      window.removeEventListener("popstate", handleRouteChange);
+      window.removeEventListener("hashchange", handleRouteChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -109,7 +130,12 @@ export default function App() {
 
     setActivePage(page);
     const nextPath = PAGE_PATHS[page];
-    if (window.location.pathname !== nextPath) {
+    if (shouldUseHashRouting()) {
+      const nextHash = `#${nextPath}`;
+      if (window.location.hash !== nextHash) {
+        window.location.hash = nextHash;
+      }
+    } else if (window.location.pathname !== nextPath) {
       window.history.pushState({}, "", nextPath);
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
